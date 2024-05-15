@@ -26,6 +26,7 @@ type ReceiverConfig struct {
 	BigQuery      *BigQueryConfig      `yaml:"bigquery"`
 	EventBridge   *EventBridgeConfig   `yaml:"eventbridge"`
 	Pipe          *PipeConfig          `yaml:"pipe"`
+	ClickHouse    *ClickHouseConfig    `yaml:"clickhouse"`
 }
 
 func (r *ReceiverConfig) Validate() error {
@@ -120,6 +121,10 @@ func (r *ReceiverConfig) GetSink() (Sink, error) {
 
 	if r.Loki != nil {
 		return NewLoki(r.Loki)
+	}
+
+	if r.ClickHouse != nil {
+		return NewClickHouse(r.ClickHouse)
 	}
 
 	return nil, errors.New("unknown sink")
