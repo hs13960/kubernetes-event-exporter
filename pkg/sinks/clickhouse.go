@@ -22,6 +22,7 @@ type ClickHouseConfig struct {
 	TLS               *TLS     `yaml:"tls"`
 	CreateTable       bool     `yaml:"createTable"`
 	TableEngine       string   `yaml:"tableEngine"`
+	TableTTLDays      *int     `yaml:"tableTtlDays"`
 	Compress          string   `yaml:"compress"`
 	MaxIdleConns      *int     `yaml:"maxIdleConns"`
 	MaxOpenConns      *int     `yaml:"maxOpenConns"`
@@ -58,7 +59,10 @@ const (
 	ReportingInstance Nullable(String),
 ) ENGINE = %s
 ORDER BY (Name, Namespace, LastTimestamp)
-PARTITION BY toYYYYMM(LastTimestamp);`
+PARTITION BY toYYYYMM(LastTimestamp)
+%s
+;`
+	ttlStatementFmt    = "TTL toDateTime(LastTimestamp) + toIntervalDay(%d)"
 	insertStatementFmt = `INSERT INTO %s (
 	KubeClusterName,
 	Reason,
@@ -175,7 +179,11 @@ func NewClickHouse(cfg *ClickHouseConfig) (*ClickHouse, error) {
 			if cfg.TableEngine != "" {
 				tableEngine = cfg.TableEngine
 			}
-			_, err = db.Exec(fmt.Sprintf(ddlFmt, cfg.TableName, tableEngine))
+			ttlStatement := ""
+			if cfg.TableTTLDays != nil {
+				ttlStatement = fmt.Sprintf(ttlStatementFmt, *cfg.TableTTLDays)
+			}
+			_, err = db.Exec(fmt.Sprintf(ddlFmt, cfg.TableName, tableEngine, ttlStatement))
 			if err != nil {
 				return nil, err
 			}
