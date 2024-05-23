@@ -36,8 +36,8 @@ const (
 	KubeClusterName LowCardinality(String),
 	Reason LowCardinality(String),
 	Message String CODEC(ZSTD),
-	SourceComponent LowCardinality(Nullable(String)),
-	SourceHost Nullable(String),
+	SourceComponent LowCardinality(String),
+	SourceHost String,
 	FirstTimestamp DateTime,
 	LastTimestamp DateTime,
 	Count UInt32,
@@ -55,8 +55,8 @@ const (
 	OwnerReferenceKinds Array(LowCardinality(String)),
 	OwnerReferenceNames Array(LowCardinality(String)),
 	OwnerReferenceUIDs Array(UUID),
-	ReportingComponent LowCardinality(Nullable(String)),
-	ReportingInstance Nullable(String),
+	ReportingComponent LowCardinality(String),
+	ReportingInstance String,
 ) ENGINE = %s
 ORDER BY (Name, Namespace, LastTimestamp)
 PARTITION BY toYYYYMM(LastTimestamp)
