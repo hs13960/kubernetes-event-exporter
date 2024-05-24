@@ -234,7 +234,7 @@ func (c *ClickHouse) Send(ctx context.Context, ev *kube.EnhancedEvent) error {
 		if ev.Series != nil {
 			lastTimestamp = ev.Series.LastObservedTime.Time
 		} else {
-			log.Warn().
+			log.Debug().
 				Str("event namespace", ev.InvolvedObject.Namespace).
 				Str("event object name", ev.InvolvedObject.Name).
 				Str("event reason", ev.Reason).
