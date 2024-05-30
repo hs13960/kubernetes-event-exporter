@@ -54,7 +54,7 @@ const (
 	OwnerReferenceAPIVersions Array(LowCardinality(String)),
 	OwnerReferenceKinds Array(LowCardinality(String)),
 	OwnerReferenceNames Array(LowCardinality(String)),
-	OwnerReferenceUIDs Array(UUID),
+	OwnerReferenceUIDs Array(String),
 	ReportingComponent LowCardinality(String),
 	ReportingInstance String,
 ) ENGINE = %s
