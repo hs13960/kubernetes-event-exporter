@@ -45,7 +45,7 @@ const (
 	Kind LowCardinality(String),
 	Namespace LowCardinality(String),
 	Name LowCardinality(String),
-	UID UUID,
+	UID String,
 	ResourceVersion String,
 	FieldPath Nullable(String),
 	Labels Map(String, String),
