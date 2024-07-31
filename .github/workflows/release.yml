@@ -36,6 +36,14 @@ jobs:
           BUILD_VERSION="${BASE_VERSION}-${SANITIZED_BRANCH}-${RUN_NUMBER}"
           echo "BUILD_VERSION=${BUILD_VERSION}" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
 
+      - id: login-azure
+        name: Authenticate with Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - id: login-gcp
         name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v1
@@ -77,6 +85,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Login to Azure Artifact Registry
+        shell: bash
+        run: |
+          az acr login -n dataplanedeployment
+
       - name: Build and push Docker images
         uses: docker/build-push-action@v3
         with:
@@ -88,5 +101,6 @@ jobs:
             ${{secrets.GCR_ASIA_IMAGE}}:${{steps.create-version.outputs.BUILD_VERSION}}
             ${{secrets.GCR_US_IMAGE}}:${{steps.create-version.outputs.BUILD_VERSION}}
             ${{secrets.GCR_EU_IMAGE}}:${{steps.create-version.outputs.BUILD_VERSION}}
+            ${{secrets.AAR_REPO_IMAGE}}:${{steps.create-version.outputs.BUILD_VERSION}}
           build-args: |
             VERSION=${{steps.create-version.outputs.BUILD_VERSION}}
