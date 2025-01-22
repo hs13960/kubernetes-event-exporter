@@ -20,7 +20,7 @@ jobs:
       run: echo "${DOCKER_PASSWORD}" | docker login harbor.bsszxc.com.cn -u "${DOCKER_USERNAME}" --password-stdin
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag harbor.bsszxc.com.cn/ops/kubernetes-event-exporter:$(date +%s)
+      run: docker build . --file Dockerfile --tag harbor.bsszxc.com.cn/ops/kubernetes-event-exporter:$(date +%Y%m%d)
 
     - name: Push Docker image
-      run: docker push harbor.bsszxc.com.cn/ops/kubernetes-event-exporter:$(date +%s)
+      run: docker push harbor.bsszxc.com.cn/ops/kubernetes-event-exporter:$(date +%Y%m%d)
