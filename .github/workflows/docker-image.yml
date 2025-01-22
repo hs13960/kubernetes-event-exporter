@@ -7,12 +7,20 @@ on:
     branches: [ "master" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Log in to Docker Registry
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} # 替换为你的用户名
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} # 替换为你的密码
+      run: echo "${DOCKER_PASSWORD}" | docker login harbor.bsszxc.com.cn -u "${DOCKER_USERNAME}" --password-stdin
+
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build . --file Dockerfile --tag harbor.bsszxc.com.cn/ops/kubernetes-event-exporter:$(date +%s)
+
+    - name: Push Docker image
+      run: docker push harbor.bsszxc.com.cn/ops/kubernetes-event-exporter:$(date +%s)
