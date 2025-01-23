@@ -13,21 +13,22 @@ import (
 )
 
 type ClickHouseConfig struct {
-	Hosts             []string `yaml:"hosts"`
-	Username          string   `yaml:"username"`
-	Password          string   `yaml:"password"`
-	Database          string   `yaml:"database"`
-	TableName         string   `yaml:"tableName"`
-	UseHttp           bool     `yaml:"useHttp"`
-	TLS               *TLS     `yaml:"tls"`
-	CreateTable       bool     `yaml:"createTable"`
-	TableEngine       string   `yaml:"tableEngine"`
-	TableTTLDays      *int     `yaml:"tableTtlDays"`
-	Compress          string   `yaml:"compress"`
-	MaxIdleConns      *int     `yaml:"maxIdleConns"`
-	MaxOpenConns      *int     `yaml:"maxOpenConns"`
-	ConnMaxLifetimeMs *int     `yaml:"connMaxLifetimeMs"`
-	ConnMaxIdleTimeMs *int     `yaml:"connMaxIdleTimeMs"`
+	Hosts             []string          `yaml:"hosts"`
+	Username          string            `yaml:"username"`
+	Password          string            `yaml:"password"`
+	Database          string            `yaml:"database"`
+	TableName         string            `yaml:"tableName"`
+	UseHttp           bool              `yaml:"useHttp"`
+	TLS               *TLS              `yaml:"tls"`
+	CreateTable       bool              `yaml:"createTable"`
+	TableEngine       string            `yaml:"tableEngine"`
+	TableTTLDays      *int              `yaml:"tableTtlDays"`
+	Compress          string            `yaml:"compress"`
+	MaxIdleConns      *int              `yaml:"maxIdleConns"`
+	MaxOpenConns      *int              `yaml:"maxOpenConns"`
+	ConnMaxLifetimeMs *int              `yaml:"connMaxLifetimeMs"`
+	ConnMaxIdleTimeMs *int              `yaml:"connMaxIdleTimeMs"`
+	CustomLabels      map[string]string `yaml:"customLabels"`
 }
 
 const (
@@ -205,6 +206,12 @@ func (c *ClickHouse) Send(ctx context.Context, ev *kube.EnhancedEvent) error {
 	if labels == nil {
 		labels = map[string]string{}
 	}
+
+	// 合并自定义标签
+	for key, value := range c.cfg.CustomLabels {
+		labels[key] = value
+	}
+
 	annotations := ev.InvolvedObject.Annotations
 	if annotations == nil {
 		annotations = map[string]string{}
