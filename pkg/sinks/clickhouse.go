@@ -13,22 +13,24 @@ import (
 )
 
 type ClickHouseConfig struct {
-	Hosts             []string          `yaml:"hosts"`
-	Username          string            `yaml:"username"`
-	Password          string            `yaml:"password"`
-	Database          string            `yaml:"database"`
-	TableName         string            `yaml:"tableName"`
-	UseHttp           bool              `yaml:"useHttp"`
-	TLS               *TLS              `yaml:"tls"`
-	CreateTable       bool              `yaml:"createTable"`
-	TableEngine       string            `yaml:"tableEngine"`
-	TableTTLDays      *int              `yaml:"tableTtlDays"`
-	Compress          string            `yaml:"compress"`
-	MaxIdleConns      *int              `yaml:"maxIdleConns"`
-	MaxOpenConns      *int              `yaml:"maxOpenConns"`
-	ConnMaxLifetimeMs *int              `yaml:"connMaxLifetimeMs"`
-	ConnMaxIdleTimeMs *int              `yaml:"connMaxIdleTimeMs"`
-	CustomLabels      map[string]string `yaml:"customLabels"`
+	Hosts             []string `yaml:"hosts"`
+	Username          string   `yaml:"username"`
+	Password          string   `yaml:"password"`
+	Database          string   `yaml:"database"`
+	TableName         string   `yaml:"tableName"`
+	UseHttp           bool     `yaml:"useHttp"`
+	TLS               *TLS     `yaml:"tls"`
+	CreateTable       bool     `yaml:"createTable"`
+	TableEngine       string   `yaml:"tableEngine"`
+	TableTTLDays      *int     `yaml:"tableTtlDays"`
+	Compress          string   `yaml:"compress"`
+	MaxIdleConns      *int     `yaml:"maxIdleConns"`
+	MaxOpenConns      *int     `yaml:"maxOpenConns"`
+	ConnMaxLifetimeMs *int     `yaml:"connMaxLifetimeMs"`
+	ConnMaxIdleTimeMs *int     `yaml:"connMaxIdleTimeMs"`
+	ObsProject        string   `yaml:"obsProject"`
+	ObsEnv            string   `yaml:"obsEnv"`
+	ObsCluster        string   `yaml:"obsCluster"`
 }
 
 const (
@@ -58,6 +60,9 @@ const (
 	OwnerReferenceUIDs Array(String),
 	ReportingComponent LowCardinality(String),
 	ReportingInstance String,
+	obsProject LowCardinality(String),
+	obsEnv LowCardinality(String),
+	obsCluster LowCardinality(String),
 ) ENGINE = %s
 ORDER BY (Name, Namespace, LastTimestamp)
 PARTITION BY toYYYYMM(LastTimestamp)
@@ -88,8 +93,15 @@ PARTITION BY toYYYYMM(LastTimestamp)
 	OwnerReferenceNames,
 	OwnerReferenceUIDs,
 	ReportingComponent,
-	ReportingInstance
+	ReportingInstance,
+	obsProject,
+	obsEnv,
+	obsCluster
 ) VALUES (
+	?,
+	?,
+	?,
+	?,
 	?,
 	?,
 	?,
@@ -207,11 +219,6 @@ func (c *ClickHouse) Send(ctx context.Context, ev *kube.EnhancedEvent) error {
 		labels = map[string]string{}
 	}
 
-	// 合并自定义标签
-	for key, value := range c.cfg.CustomLabels {
-		labels[key] = value
-	}
-
 	annotations := ev.InvolvedObject.Annotations
 	if annotations == nil {
 		annotations = map[string]string{}
@@ -277,6 +284,9 @@ func (c *ClickHouse) Send(ctx context.Context, ev *kube.EnhancedEvent) error {
 		ownerRefUIDs,
 		ev.ReportingController,
 		ev.ReportingInstance,
+		c.cfg.ObsProject,
+		c.cfg.ObsEnv,
+		c.cfg.ObsCluster,
 	)
 	if err != nil {
 		return err
