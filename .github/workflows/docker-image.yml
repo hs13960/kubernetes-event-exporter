@@ -21,7 +21,7 @@ jobs:
 
     - name: Get Git commit ID
       id: git_commit_id
-      run: echo "commit_id=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      run: echo "commit_id=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag harbor.bsszxc.com.cn/ops/kubernetes-event-exporter:$(date +%Y%m%d)-${{ steps.git_commit_id.outputs.commit_id }}
