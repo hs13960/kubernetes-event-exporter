@@ -14,7 +14,8 @@ COPY --from=builder --chown=nonroot:nonroot /main /kubernetes-event-exporter
 # 设置时区文件路径
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Asia/Shanghai
-RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+# 手动创建软链接
+COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 # https://github.com/GoogleContainerTools/distroless/blob/main/base/base.bzl#L8C1-L9C1
 USER 65532
